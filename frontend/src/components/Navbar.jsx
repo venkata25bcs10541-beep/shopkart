@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, LogOut, User as UserIcon } from 'lucide-react';
+import { ShoppingBag, LogOut, User as UserIcon, Heart, Home as HomeIcon } from 'lucide-react';
 import { logoutCustomer } from '../services/api';
 
 const Navbar = ({ customer, setCustomer }) => {
@@ -22,7 +22,7 @@ const Navbar = ({ customer, setCustomer }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Brand Logo */}
-          <Link to={customer ? '/home' : '/login'} className="flex items-center gap-2 group">
+          <Link to={customer ? '/home' : '/products'} className="flex items-center gap-2 group">
             <div className="bg-indigo-600 text-white p-2 rounded-xl group-hover:bg-indigo-700 transition">
               <ShoppingBag className="w-5 h-5" />
             </div>
@@ -31,8 +31,17 @@ const Navbar = ({ customer, setCustomer }) => {
             </span>
           </Link>
 
-          {/* Main Navigation Links */}
+          {/* Main Navigation Links: Home | Products | Wishlist */}
           <div className="flex items-center gap-6">
+            {customer && (
+              <Link
+                to="/home"
+                className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5"
+              >
+                <HomeIcon className="w-4 h-4 text-slate-500" />
+                <span>Home</span>
+              </Link>
+            )}
             <Link
               to="/products"
               className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5"
@@ -40,14 +49,13 @@ const Navbar = ({ customer, setCustomer }) => {
               <ShoppingBag className="w-4 h-4 text-indigo-600" />
               <span>Products</span>
             </Link>
-            {customer && (
-              <Link
-                to="/home"
-                className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
-              >
-                Profile & Home
-              </Link>
-            )}
+            <Link
+              to="/wishlist"
+              className="text-sm font-semibold text-slate-700 hover:text-rose-600 transition flex items-center gap-1.5"
+            >
+              <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+              <span>Wishlist</span>
+            </Link>
           </div>
 
           {/* User Controls & Navigation */}

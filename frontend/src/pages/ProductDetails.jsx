@@ -13,8 +13,10 @@ import {
   RotateCcw,
   AlertCircle,
   PackageX,
+  Heart,
+  Loader2,
 } from 'lucide-react';
-import { getProductById } from '../services/api';
+import { getProductById, toggleWishlist } from '../services/api';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -25,6 +27,9 @@ const ProductDetails = () => {
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [addedToast, setAddedToast] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [savingWishlist, setSavingWishlist] = useState(false);
+  const [wishlistToast, setWishlistToast] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -78,6 +83,26 @@ const ProductDetails = () => {
   const decrementQty = () => {
     if (quantity > 1) {
       setQuantity((q) => q - 1);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (savingWishlist) return;
+    setSavingWishlist(true);
+    try {
+      const res = await toggleWishlist(id);
+      setIsWishlisted(res.saved);
+      setWishlistToast(res.saved ? 'Added to Wishlist ❤️' : 'Removed from Wishlist');
+      setTimeout(() => setWishlistToast(''), 3000);
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        navigate('/login');
+      } else {
+        setWishlistToast('Unable to update wishlist. Please try again.');
+        setTimeout(() => setWishlistToast(''), 3000);
+      }
+    } finally {
+      setSavingWishlist(false);
     }
   };
 
@@ -229,15 +254,46 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition shadow-md hover:shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                <span>{isOutOfStock ? 'Currently Unavailable' : 'Add to Cart'}</span>
-              </button>
+              {/* Action Buttons: Add to Cart + Wishlist */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  className="sm:col-span-2 flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition shadow-md hover:shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  <span>{isOutOfStock ? 'Currently Unavailable' : 'Add to Cart'}</span>
+                </button>
+
+                <button
+                  onClick={handleWishlistToggle}
+                  disabled={savingWishlist}
+                  className={`flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-sm font-bold border transition cursor-pointer active:scale-[0.98] ${
+                    isWishlisted
+                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-rose-600'
+                  }`}
+                >
+                  {savingWishlist ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+                  ) : (
+                    <Heart
+                      className={`w-5 h-5 ${
+                        isWishlisted ? 'fill-rose-500 text-rose-500' : ''
+                      }`}
+                    />
+                  )}
+                  <span>{isWishlisted ? 'Saved' : 'Wishlist'}</span>
+                </button>
+              </div>
+
+              {/* Wishlist Toast */}
+              {wishlistToast && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm flex items-center gap-2 animate-fade-in">
+                  <Heart className="w-4 h-4 fill-rose-500 text-rose-500 flex-shrink-0" />
+                  <span>{wishlistToast}</span>
+                </div>
+              )}
 
               {/* Notification Toast */}
               {addedToast && (

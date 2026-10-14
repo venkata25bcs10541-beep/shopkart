@@ -193,15 +193,20 @@ const Home = ({ customer, setCustomer }) => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
-              <Heart className="w-6 h-6" />
+          <Link
+            to="/wishlist"
+            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:border-rose-300 hover:shadow-md transition group cursor-pointer"
+          >
+            <div className="p-3 bg-rose-50 text-rose-600 rounded-xl group-hover:scale-110 transition">
+              <Heart className="w-6 h-6 fill-rose-500/20" />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase">Wishlist</p>
-              <p className="text-2xl font-bold text-slate-900">0</p>
+              <p className="text-xs font-medium text-slate-500 uppercase">My Wishlist</p>
+              <p className="text-sm font-bold text-rose-600 mt-0.5 flex items-center gap-1">
+                View Saved Items →
+              </p>
             </div>
-          </div>
+          </Link>
 
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
             <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">

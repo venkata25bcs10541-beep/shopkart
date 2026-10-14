@@ -81,4 +81,49 @@ export const createProduct = async (productData) => {
   return response.data;
 };
 
+/**
+ * Lab 04 Task 2: Add product to current user's wishlist
+ * POST /wishlist/:productId
+ */
+export const addToWishlist = async (productId) => {
+  const response = await API.post(`/wishlist/${productId}`);
+  return response.data;
+};
+
+/**
+ * Lab 04 Task 3: Get current user's wishlist
+ * GET /wishlist
+ */
+export const getWishlist = async () => {
+  const response = await API.get('/wishlist');
+  return response.data;
+};
+
+/**
+ * Lab 04 Task 4: Remove product from current user's wishlist
+ * DELETE /wishlist/:productId
+ */
+export const removeFromWishlist = async (productId) => {
+  const response = await API.delete(`/wishlist/${productId}`);
+  return response.data;
+};
+
+/**
+ * Lab 04 Bonus 1: Toggle product in wishlist
+ * PATCH /wishlist/:productId/toggle
+ */
+export const toggleWishlist = async (productId) => {
+  const response = await API.patch(`/wishlist/${productId}/toggle`);
+  return response.data;
+};
+
+/**
+ * Lab 04 Bonus 2: Get wishlist count for navbar badge
+ * GET /wishlist/count
+ */
+export const getWishlistCount = async () => {
+  const response = await API.get('/wishlist/count');
+  return response.data;
+};
+
 export default API;

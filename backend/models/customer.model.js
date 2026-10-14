@@ -27,6 +27,13 @@ const customerSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    // Lab 04 Task 1: Wishlist relationship referencing Product model
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
   },
   {
     versionKey: false,
@@ -36,3 +43,5 @@ const customerSchema = new mongoose.Schema(
 const Customer = mongoose.model('Customer', customerSchema);
 
 module.exports = Customer;
+module.exports.Customer = Customer;
+module.exports.User = Customer;

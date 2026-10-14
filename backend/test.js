@@ -20,6 +20,13 @@ const {
   getProducts,
   getProductById,
 } = require('./controllers/product.controller');
+const {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+  toggleWishlist,
+  getWishlistCount,
+} = require('./controllers/wishlist.controller');
 const authMiddleware = require('./middlewares/auth.middleware');
 const generateToken = require('./utils/generateToken');
 
@@ -75,16 +82,29 @@ async function runTests() {
         }
         return cust;
       },
+      populate: (popOpts) => {
+        const cust = findCust();
+        if (!cust) return Promise.resolve(null);
+        const populatedList = (cust.wishlist || []).map((prodId) => {
+          return productDb.find((p) => String(p._id) === String(prodId)) || { _id: prodId };
+        });
+        return Promise.resolve({
+          ...cust,
+          wishlist: populatedList,
+        });
+      },
       then: (resolve, reject) => {
         try {
           const cust = findCust();
           if (!cust) return resolve(null);
           const custObj = {
             ...cust,
+            wishlist: cust.wishlist || [],
             save: async function () {
               const idx = db.findIndex((c) => String(c._id) === String(id));
               if (idx !== -1) {
                 db[idx].password = this.password;
+                db[idx].wishlist = this.wishlist;
               }
               return this;
             },
@@ -100,6 +120,7 @@ async function runTests() {
   Customer.create = async (doc) => {
     const newDoc = {
       _id: 'cust_' + (db.length + 1),
+      wishlist: [],
       ...doc,
       createdAt: new Date(),
     };
@@ -505,8 +526,126 @@ async function runTests() {
     console.log('✔ Test 22 Passed: Get Single Product handles valid ID, invalid ID (400), and not found (404)');
   }
 
+  // ==========================================
+  // LAB 04: WISHLIST FEATURE TESTS
+  // ==========================================
+  console.log('\n--- Starting ShopKart Wishlist Tests ---');
+  const user = db.find((c) => c.email === 'john@gmail.com');
+  const authReq = { user: { _id: user._id } };
+
+  // Test 23: Add to wishlist - invalid product ID format -> 400
+  {
+    const req = { ...authReq, params: { productId: 'invalid-hex-id' } };
+    const res = createMockRes();
+    await addToWishlist(req, res);
+    assert.strictEqual(res.statusCode, 400, 'Should return 400 on invalid product ID');
+    console.log('✔ Test 23 Passed: Add to Wishlist returns 400 for malformed product ID');
+  }
+
+  // Test 24: Add to wishlist - non-existent product -> 404
+  {
+    const req = { ...authReq, params: { productId: '000000000000000000000999' } };
+    const res = createMockRes();
+    await addToWishlist(req, res);
+    assert.strictEqual(res.statusCode, 404, 'Should return 404 when product is not found');
+    console.log('✔ Test 24 Passed: Add to Wishlist returns 404 when product does not exist');
+  }
+
+  // Test 25: Add to wishlist - success -> 201
+  {
+    const req = { ...authReq, params: { productId: createdProductId } };
+    const res = createMockRes();
+    await addToWishlist(req, res);
+    assert.strictEqual(res.statusCode, 201, 'Should return 201 on success');
+    assert.strictEqual(res.body.success, true);
+    assert.ok(user.wishlist.includes(createdProductId), 'Product reference must be stored in user wishlist');
+    console.log('✔ Test 25 Passed: Add to Wishlist succeeds (201) and saves Product reference');
+  }
+
+  // Test 26: Add to wishlist - duplicate entry -> 409 Conflict
+  {
+    const req = { ...authReq, params: { productId: createdProductId } };
+    const res = createMockRes();
+    await addToWishlist(req, res);
+    assert.strictEqual(res.statusCode, 409, 'Should return 409 Conflict for duplicate item');
+    assert.strictEqual(res.body.success, false);
+    console.log('✔ Test 26 Passed: Duplicate wishlist request prevented with 409 Conflict');
+  }
+
+  // Test 27: Get current user's wishlist -> 200 with populated product details
+  {
+    const req = { ...authReq };
+    const res = createMockRes();
+    await getWishlist(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.count, 1);
+    assert.strictEqual(res.body.wishlist[0].name, 'Mechanical Keyboard');
+    assert.strictEqual(res.body.wishlist[0].price, 2999);
+    console.log('✔ Test 27 Passed: Get Wishlist returns populated products and count for authenticated user');
+  }
+
+  // Test 28: Remove from wishlist - invalid product ID format -> 400
+  {
+    const req = { ...authReq, params: { productId: 'invalid-hex-id' } };
+    const res = createMockRes();
+    await removeFromWishlist(req, res);
+    assert.strictEqual(res.statusCode, 400);
+    console.log('✔ Test 28 Passed: Remove from Wishlist returns 400 for malformed product ID');
+  }
+
+  // Test 29: Remove from wishlist - product not in wishlist -> 404
+  {
+    const req = { ...authReq, params: { productId: '000000000000000000000999' } };
+    const res = createMockRes();
+    await removeFromWishlist(req, res);
+    assert.strictEqual(res.statusCode, 404);
+    console.log('✔ Test 29 Passed: Remove from Wishlist returns 404 for item not in wishlist');
+  }
+
+  // Test 30: Remove from wishlist - success -> 200
+  {
+    const req = { ...authReq, params: { productId: createdProductId } };
+    const res = createMockRes();
+    await removeFromWishlist(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(user.wishlist.length, 0);
+    console.log('✔ Test 30 Passed: Remove from Wishlist succeeds (200) and cleans user array');
+  }
+
+  // Test 31: Bonus Challenge - Wishlist Toggle Action (saved: true then saved: false)
+  {
+    // Toggle ON
+    const reqOn = { ...authReq, params: { productId: createdProductId } };
+    const resOn = createMockRes();
+    await toggleWishlist(reqOn, resOn);
+    assert.strictEqual(resOn.statusCode, 200);
+    assert.strictEqual(resOn.body.saved, true);
+    assert.strictEqual(user.wishlist.length, 1);
+
+    // Toggle OFF
+    const reqOff = { ...authReq, params: { productId: createdProductId } };
+    const resOff = createMockRes();
+    await toggleWishlist(reqOff, resOff);
+    assert.strictEqual(resOff.statusCode, 200);
+    assert.strictEqual(resOff.body.saved, false);
+    assert.strictEqual(user.wishlist.length, 0);
+    console.log('✔ Test 31 Passed: Bonus Wishlist Toggle flips saved status accurately');
+  }
+
+  // Test 32: Bonus Challenge - Wishlist Count
+  {
+    const req = { ...authReq };
+    const res = createMockRes();
+    await getWishlistCount(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.count, 0);
+    console.log('✔ Test 32 Passed: Bonus Wishlist Count returns accurate count');
+  }
+
   console.log('\n==========================================');
-  console.log('All 22/22 Lab 01 + Lab 03 Tests PASSED! 🎉');
+  console.log('All 32/32 Labs 01 + 03 + 04 Tests PASSED! 🎉');
   console.log('==========================================\n');
 }
 

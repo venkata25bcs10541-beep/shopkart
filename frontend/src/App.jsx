@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   const [customer, setCustomer] = useState(null);
@@ -22,6 +23,7 @@ function App() {
             <Route path="/home" element={<Home customer={customer} setCustomer={setCustomer} />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="*" element={<Navigate to="/products" replace />} />
           </Routes>
         </main>

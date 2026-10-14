@@ -355,6 +355,128 @@
           }
         }
       ]
+    },
+    {
+      "name": "Wishlist Service (Lab 04)",
+      "item": [
+        {
+          "name": "1. Add to Wishlist (POST /wishlist/:productId)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sample_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "{{sample_product_id}}"]
+            },
+            "description": "Protected route. Adds product reference to authenticated user's wishlist."
+          }
+        },
+        {
+          "name": "2. Add to Wishlist (Duplicate - 409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sample_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "{{sample_product_id}}"]
+            },
+            "description": "Attempt adding duplicate product. Returns 409 Conflict."
+          }
+        },
+        {
+          "name": "3. Add to Wishlist (Invalid Product ID - 400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/invalid-hex-id",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "invalid-hex-id"]
+            },
+            "description": "Malformed ObjectId format. Returns 400 Bad Request."
+          }
+        },
+        {
+          "name": "4. Add to Wishlist (Product Not Found - 404)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/000000000000000000000999",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "000000000000000000000999"]
+            },
+            "description": "Non-existent product ID. Returns 404 Product Not Found."
+          }
+        },
+        {
+          "name": "5. Get My Wishlist (GET /wishlist)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist"]
+            },
+            "description": "Protected route. Returns populated product details for authenticated user's wishlist."
+          }
+        },
+        {
+          "name": "6. Remove from Wishlist (DELETE /wishlist/:productId)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sample_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "{{sample_product_id}}"]
+            },
+            "description": "Protected route. Removes product from user's wishlist array."
+          }
+        },
+        {
+          "name": "7. Remove from Wishlist (Not In Wishlist - 404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/000000000000000000000999",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "000000000000000000000999"]
+            },
+            "description": "Attempt removing item not present in wishlist. Returns 404."
+          }
+        },
+        {
+          "name": "8. Wishlist Toggle (Bonus: PATCH /wishlist/:productId/toggle)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/{{sample_product_id}}/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "{{sample_product_id}}", "toggle"]
+            },
+            "description": "Bonus Challenge: Toggles product presence in wishlist and returns saved: true/false."
+          }
+        },
+        {
+          "name": "9. Wishlist Count (Bonus: GET /wishlist/count)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wishlist/count",
+              "host": ["{{base_url}}"],
+              "path": ["wishlist", "count"]
+            },
+            "description": "Bonus Challenge: Returns current count of wishlist items."
+          }
+        }
+      ]
     }
   ]
 }
