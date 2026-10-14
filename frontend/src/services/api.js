@@ -54,4 +54,31 @@ export const changePassword = async (passwords) => {
   return response.data;
 };
 
+/**
+ * Lab 03 Task 3, 5 & Bonus: Fetch all products with optional search, category, and sort
+ * GET /products?search=...&category=...&sort=...
+ */
+export const getProducts = async (params = {}) => {
+  const response = await API.get('/products', { params });
+  return response.data;
+};
+
+/**
+ * Lab 03 Task 4: Fetch single product by ID
+ * GET /products/:id
+ */
+export const getProductById = async (id) => {
+  const response = await API.get(`/products/${id}`);
+  return response.data;
+};
+
+/**
+ * Lab 03 Task 2: Create a new product
+ * POST /products
+ */
+export const createProduct = async (productData) => {
+  const response = await API.post('/products', productData);
+  return response.data;
+};
+
 export default API;

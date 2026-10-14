@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const customerRoutes = require('./routes/customer.routes');
+const productRoutes = require('./routes/product.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,12 +25,13 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'ShopKart Customer Authentication Service API is running',
+    message: 'ShopKart API is running',
   });
 });
 
 // API Routes
 app.use('/customers', customerRoutes);
+app.use('/products', productRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {

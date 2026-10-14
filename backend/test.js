@@ -14,6 +14,12 @@ const {
   logoutCustomer,
   changePassword,
 } = require('./controllers/customer.controller');
+const Product = require('./models/product.model');
+const {
+  createProduct,
+  getProducts,
+  getProductById,
+} = require('./controllers/product.controller');
 const authMiddleware = require('./middlewares/auth.middleware');
 const generateToken = require('./utils/generateToken');
 
@@ -288,8 +294,219 @@ async function runTests() {
     console.log('✔ Test 13 Passed: Bonus Change Password correctly verifies old password and saves new hash');
   }
 
+  // ==========================================
+  // LAB 03: PRODUCT CATALOG & DISCOVERY TESTS
+  // ==========================================
+  console.log('\n--- Starting ShopKart Product Catalog Tests ---');
+  const productDb = [];
+
+  Product.create = async (doc) => {
+    // Generate valid 24-character hex ObjectId string for testing
+    const hexId = (productDb.length + 1).toString().padStart(24, '0');
+    const newDoc = {
+      _id: hexId,
+      ...doc,
+      createdAt: new Date(),
+    };
+    productDb.push(newDoc);
+    return newDoc;
+  };
+
+  Product.find = (filter = {}) => {
+    let results = [...productDb];
+
+    if (filter.name && filter.name.$regex) {
+      const regex = new RegExp(filter.name.$regex, filter.name.$options || 'i');
+      results = results.filter((p) => regex.test(p.name));
+    }
+
+    if (filter.category) {
+      if (typeof filter.category === 'object' && filter.category.$regex) {
+        const regex = new RegExp(filter.category.$regex, filter.category.$options || 'i');
+        results = results.filter((p) => regex.test(p.category));
+      } else {
+        results = results.filter((p) => p.category.toLowerCase() === String(filter.category).toLowerCase());
+      }
+    }
+
+    return {
+      sort: (sortOpts = {}) => {
+        if (sortOpts.price === 1) {
+          results.sort((a, b) => a.price - b.price);
+        } else if (sortOpts.price === -1) {
+          results.sort((a, b) => b.price - a.price);
+        }
+        return Promise.resolve(results);
+      },
+    };
+  };
+
+  Product.findById = async (id) => {
+    return productDb.find((p) => String(p._id) === String(id)) || null;
+  };
+
+  // Test 14: Product creation - missing fields -> 400
+  {
+    const req = { body: { name: 'Incomplete Item' } };
+    const res = createMockRes();
+    await createProduct(req, res);
+    assert.strictEqual(res.statusCode, 400, 'Should return 400 when required fields are missing');
+    assert.strictEqual(res.body.success, false);
+    console.log('✔ Test 14 Passed: Create Product fails with 400 on missing fields');
+  }
+
+  // Test 15: Product creation - invalid price (<= 0) -> 400
+  {
+    const req = {
+      body: {
+        name: 'Keyboard',
+        description: 'RGB keyboard',
+        price: -50,
+        category: 'Electronics',
+        image: 'https://example.com/kb.jpg',
+        stock: 5,
+      },
+    };
+    const res = createMockRes();
+    await createProduct(req, res);
+    assert.strictEqual(res.statusCode, 400, 'Should return 400 on price <= 0');
+    console.log('✔ Test 15 Passed: Create Product fails with 400 on invalid price <= 0');
+  }
+
+  // Test 16: Product creation - invalid stock (< 0) -> 400
+  {
+    const req = {
+      body: {
+        name: 'Keyboard',
+        description: 'RGB keyboard',
+        price: 2999,
+        category: 'Electronics',
+        image: 'https://example.com/kb.jpg',
+        stock: -2,
+      },
+    };
+    const res = createMockRes();
+    await createProduct(req, res);
+    assert.strictEqual(res.statusCode, 400, 'Should return 400 on stock < 0');
+    console.log('✔ Test 16 Passed: Create Product fails with 400 on negative stock');
+  }
+
+  // Test 17: Product creation - success -> 201
+  let createdProductId = null;
+  {
+    const req = {
+      body: {
+        name: 'Mechanical Keyboard',
+        description: 'RGB mechanical keyboard with blue switches.',
+        price: 2999,
+        category: 'Electronics',
+        image: 'https://example.com/keyboard.jpg',
+        stock: 10,
+      },
+    };
+    const res = createMockRes();
+    await createProduct(req, res);
+    assert.strictEqual(res.statusCode, 201, 'Should return 201 on created product');
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.product.name, 'Mechanical Keyboard');
+    createdProductId = res.body.product._id;
+    console.log('✔ Test 17 Passed: Create Product succeeds with 201 and valid payload');
+  }
+
+  // Add more sample products to test filtering and sorting
+  await Product.create({
+    name: 'Noise Cancelling Headphones',
+    description: 'Wireless over-ear headphones with ANC.',
+    price: 4999,
+    category: 'Electronics',
+    image: 'https://example.com/headphones.jpg',
+    stock: 25,
+  });
+
+  await Product.create({
+    name: 'Cotton Graphic T-Shirt',
+    description: '100% breathable organic cotton tee.',
+    price: 799,
+    category: 'Fashion',
+    image: 'https://example.com/tshirt.jpg',
+    stock: 50,
+  });
+
+  // Test 18: Get all products -> 200 with count
+  {
+    const req = { query: {} };
+    const res = createMockRes();
+    await getProducts(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.count, 3);
+    assert.strictEqual(res.body.products.length, 3);
+    console.log('✔ Test 18 Passed: Get All Products returns list with correct count');
+  }
+
+  // Test 19: Search products (case-insensitive)
+  {
+    const req = { query: { search: 'keyboard' } };
+    const res = createMockRes();
+    await getProducts(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.count, 1);
+    assert.strictEqual(res.body.products[0].name, 'Mechanical Keyboard');
+    console.log('✔ Test 19 Passed: Search filters products case-insensitively by name');
+  }
+
+  // Test 20: Filter products by category
+  {
+    const req = { query: { category: 'Fashion' } };
+    const res = createMockRes();
+    await getProducts(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.count, 1);
+    assert.strictEqual(res.body.products[0].name, 'Cotton Graphic T-Shirt');
+    console.log('✔ Test 20 Passed: Category filtering returns products strictly from specified category');
+  }
+
+  // Test 21: Bonus Challenge - Sorting (price_asc and price_desc)
+  {
+    const reqAsc = { query: { sort: 'price_asc' } };
+    const resAsc = createMockRes();
+    await getProducts(reqAsc, resAsc);
+    assert.strictEqual(resAsc.body.products[0].price, 799, 'Lowest price first in price_asc');
+    assert.strictEqual(resAsc.body.products[2].price, 4999);
+
+    const reqDesc = { query: { sort: 'price_desc' } };
+    const resDesc = createMockRes();
+    await getProducts(reqDesc, resDesc);
+    assert.strictEqual(resDesc.body.products[0].price, 4999, 'Highest price first in price_desc');
+    assert.strictEqual(resDesc.body.products[2].price, 799);
+    console.log('✔ Test 21 Passed: Bonus price sorting works accurately for price_asc and price_desc');
+  }
+
+  // Test 22: Get Single Product by ID (valid, invalid ID format 400, not found 404)
+  {
+    // Invalid ID format
+    const reqBad = { params: { id: 'invalid-id' } };
+    const resBad = createMockRes();
+    await getProductById(reqBad, resBad);
+    assert.strictEqual(resBad.statusCode, 400);
+
+    // Non-existent ID
+    const req404 = { params: { id: '000000000000000000000999' } };
+    const res404 = createMockRes();
+    await getProductById(req404, res404);
+    assert.strictEqual(res404.statusCode, 404);
+
+    // Valid existing ID
+    const reqOk = { params: { id: createdProductId } };
+    const resOk = createMockRes();
+    await getProductById(reqOk, resOk);
+    assert.strictEqual(resOk.statusCode, 200);
+    assert.strictEqual(resOk.body.product.name, 'Mechanical Keyboard');
+    console.log('✔ Test 22 Passed: Get Single Product handles valid ID, invalid ID (400), and not found (404)');
+  }
+
   console.log('\n==========================================');
-  console.log('All 13/13 Authentication Tests PASSED! 🎉');
+  console.log('All 22/22 Lab 01 + Lab 03 Tests PASSED! 🎉');
   console.log('==========================================\n');
 }
 

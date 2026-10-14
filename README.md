@@ -1,8 +1,9 @@
-# ShopKart — Fullstack Customer Authentication System
+# ShopKart — Fullstack E-Commerce Platform
 
-A complete, production-grade Customer Authentication System built for **ShopKart**:
-- **Lab 01 (Backend):** Express, MongoDB, Mongoose, bcrypt, JWT & HttpOnly cookies following MVC architecture.
-- **Lab 02 (Frontend):** React 19, React Router v7, Axios, Tailwind CSS v4, Lucide Icons, and HttpOnly cookie integration (`withCredentials: true`).
+A production-grade, modular e-commerce application built across three engineering labs:
+- **Lab 01 (Backend):** Customer Authentication Service (Express, MongoDB, Mongoose, bcrypt, JWT, HttpOnly cookies, MVC).
+- **Lab 02 (Frontend):** Customer Auth UI (React 19, React Router v7, Axios, Tailwind CSS v4, Lucide Icons, HttpOnly cookies).
+- **Lab 03 (Fullstack):** Product Catalog & Discovery (Mongoose schema, REST APIs, dynamic querying, search, category filter, price sorting, dynamic detail pages, loading/empty/error states).
 
 ---
 
@@ -10,33 +11,40 @@ A complete, production-grade Customer Authentication System built for **ShopKart
 
 ```text
 shopkart/
-├── ShopKart_Customer_Auth_API.postman_collection.json
+├── ShopKart_API_Collection.postman_collection.json
 ├── package.json
 ├── README.md
 ├── backend/
 │   ├── controllers/
-│   │   └── customer.controller.js
+│   │   ├── customer.controller.js
+│   │   └── product.controller.js
 │   ├── middlewares/
 │   │   └── auth.middleware.js
 │   ├── models/
-│   │   └── customer.model.js
+│   │   ├── customer.model.js
+│   │   └── product.model.js
 │   ├── routes/
-│   │   └── customer.routes.js
+│   │   ├── customer.routes.js
+│   │   └── product.routes.js
 │   ├── utils/
 │   │   └── generateToken.js
 │   ├── .env
 │   ├── .env.example
 │   ├── index.js
 │   ├── package.json
+│   ├── seed.js
 │   └── test.js
 └── frontend/
-    ├── public/
     ├── src/
     │   ├── components/
-    │   │   └── Navbar.jsx
+    │   │   ├── Navbar.jsx
+    │   │   ├── ProductCard.jsx
+    │   │   └── SearchBar.jsx
     │   ├── pages/
     │   │   ├── Home.jsx
     │   │   ├── Login.jsx
+    │   │   ├── ProductDetails.jsx
+    │   │   ├── Products.jsx
     │   │   └── Register.jsx
     │   ├── services/
     │   │   └── api.js
@@ -50,122 +58,161 @@ shopkart/
 
 ---
 
-## ⚡ Quick Start (Running Both Backend & Frontend)
+## 🚀 Quick Start Guide
 
-### 1. Start MongoDB
-Ensure MongoDB is running locally (`mongodb://127.0.0.1:27017/shopkart`) or set your Atlas URI in `backend/.env`.
+### 1. Database Setup & Seeding
+Ensure MongoDB is running locally (`mongodb://127.0.0.1:27017/shopkart`) or update `MONGO_URI` in `backend/.env`.
 
-### 2. Start Backend (Port 5000)
+Populate the database with realistic products across all categories (Electronics, Fashion, Books, Home):
+```bash
+# From root directory:
+npm run seed
+
+# Or inside backend:
+cd backend && npm run seed
+```
+
+### 2. Run Backend (Port 5000)
 ```bash
 cd backend
-npm install
 npm run dev
 ```
 
-### 3. Start Frontend (Port 5173)
-In a separate terminal:
+### 3. Run Frontend (Port 5173)
+In another terminal:
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
-Open your browser at **`http://localhost:5173`**.
+Open **`http://localhost:5173/products`** in your browser.
 
----
-
-## 🎨 Lab 02: Frontend Features & Implementation
-
-### Task 1 — Registration Page (`/register`) [25 Marks]
-- Form fields: **Full Name**, **Email**, **Password**, **Phone Number**, and **Create Account Button**.
-- **Controlled Components:** Every input binds to React state (`formData`) with synchronized `onChange` handlers.
-- **Client & Server Validation:** Validates mandatory fields, email regex format, and minimum 6-character password. Server errors (such as `409 Email already exists`) are displayed in alert banners.
-- **Success Transition:** Displays success state and navigates to `/login` via React Router.
-
-### Task 2 — Login Page (`/login`) [30 Marks]
-- Form fields: **Email**, **Password**, and **Login Button**.
-- **HttpOnly Cookie Integration:** Dispatches `POST /customers/login` with `withCredentials: true` via Axios so the browser automatically persists the JWT cookie.
-- **Error Handling:** Renders clear `"Invalid credentials"` notification on authentication failure without leaking account existence.
-- **Success Navigation:** Automatically redirects authenticated customer to `/home`.
-
-### Task 3 — Protected Home Page (`/home`) [30 Marks]
-- Accessible only to authenticated customers.
-- Dispatches `GET /customers/me` with `withCredentials: true` on component mount to retrieve authenticated profile details from MongoDB.
-- If unauthorized (missing/expired cookie), automatically redirects to `/login`.
-- Displays:
-  - Welcome banner with customer name.
-  - Verified details: Full Name, Email, and Phone Number.
-  - ShopKart e-commerce overview cards (Cart, Orders, Wishlist, Wallet).
-  - Built-in Change Password modal (Bonus Challenge).
-
-### Task 4 — Logout Flow [15 Marks]
-- Integrated directly in the persistent [`Navbar`](file:///c:/Users/kurra/Downloads/shopkart/frontend/src/components/Navbar.jsx).
-- Invokes `POST /customers/logout` to clear the HttpOnly authentication cookie.
-- Clears local customer state and redirects to `/login`.
-
----
-
-## 🧪 Testing Backend APIs (Lab 01)
-
-Run the automated backend test suite (13/13 passing tests):
+### 4. Run Automated Test Suite (22/22 Tests Passing)
 ```bash
 npm test
 ```
 
-Or import `ShopKart_Customer_Auth_API.postman_collection.json` into Postman to run tests against the live server.
+---
+
+## 🛒 Lab 03: Product Catalog & Discovery Architecture
+
+### Backend Product APIs
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
+| `POST` | `/products` | Create a new product with validation (`price > 0`, `stock >= 0`, all mandatory fields). Returns `201 Created`. |
+| `GET` | `/products` | Get all products with dynamic filtering: `?search=...`, `?category=...`, and bonus `?sort=price_asc\|price_desc`. |
+| `GET` | `/products/:id` | Get single product by MongoDB ObjectId. Validates ID format (`400`) and existence (`404`). |
+
+#### Query Parameters Examples:
+- **Search by Name (case-insensitive):** `GET /products?search=keyboard`
+- **Category Filter:** `GET /products?category=Electronics`
+- **Combined Search & Category:** `GET /products?search=keyboard&category=Electronics`
+- **🌟 Bonus Challenge (+10 Marks) Price Sorting:**
+  - Low to High: `GET /products?sort=price_asc`
+  - High to Low: `GET /products?sort=price_desc`
 
 ---
 
-## 🎓 Lab 02 TA Viva Questions & Complete Answers (Full Marks)
+### Frontend Product Discovery Pages & Components
 
-### Q1: Why do we use `withCredentials: true`?
-> **Answer:**
-> By default, browser security restrictions prevent cross-origin HTTP requests from sending or receiving credentials (such as cookies, HTTP authentication headers, or TLS client certificates).
-> Setting `withCredentials: true` on our Axios instance instructs the browser:
-> 1. To attach existing cookies (including our `token` HttpOnly cookie) to outgoing cross-origin requests made to `http://localhost:5000`.
-> 2. To accept and store any `Set-Cookie` headers returned by the server.
-> Without this flag, the authentication cookie set on login would never be forwarded to `/customers/me`, making session maintenance impossible.
+- **[`/products`](file:///c:/Users/kurra/Downloads/shopkart/frontend/src/pages/Products.jsx) (Product Listing Page):**
+  - Dynamically fetches product data using `getProducts()` in `api.js`.
+  - Debounced search query triggers backend MongoDB regex matching.
+  - Category selector filters by `Electronics`, `Fashion`, `Books`, and `Home`.
+  - Bonus price sorter toggles between Ascending and Descending.
+  - **State Handling:**
+    - **Loading State:** Animated spinner and `"Loading products..."` banner.
+    - **Error State:** Error banner `"Something went wrong while loading products."` with a **Retry Connection** button.
+    - **Empty State:** `"No products found."` with **Clear All Filters** action.
+- **[`ProductCard.jsx`](file:///c:/Users/kurra/Downloads/shopkart/frontend/src/components/ProductCard.jsx):**
+  - High-resolution image with fallback error handler.
+  - Formatted price in INR (`₹2,999`).
+  - Category pill badge.
+  - Stock availability status badge (`In Stock`, `Only X left`, or `Out of Stock`).
+  - "View Details" button linking to `/products/:id`.
+- **[`/products/:id`](file:///c:/Users/kurra/Downloads/shopkart/frontend/src/pages/ProductDetails.jsx) (Product Details Page):**
+  - Extracts route ID parameter via React Router's `useParams()`.
+  - Fetches product using `getProductById(id)`.
+  - Renders large hero image, breadcrumb navigation, full description, availability, and taxes disclaimer.
+  - Interactive **Quantity Selector** bounded by stock limits.
+  - **Add to Cart** button with interactive toast confirmation.
 
-### Q2: Why can't JavaScript read an HttpOnly cookie?
-> **Answer:**
-> The `HttpOnly` attribute is a protective flag set by the server on the `Set-Cookie` header. When present, the browser prohibits client-side scripts from accessing that cookie through properties like `document.cookie`.
-> This is a crucial security barrier against **Cross-Site Scripting (XSS)** attacks: even if malicious third-party script or an injected script runs on the web application, it cannot steal the customer's session token or impersonate the user.
+---
 
-### Q3: Why is `/home` called a protected route?
-> **Answer:**
-> `/home` is called a protected route because it is restricted to authenticated users. Unauthenticated visitors are not allowed to view the route.
-> When a user navigates to `/home`, the application verifies authentication status by querying the backend endpoint `GET /customers/me`. If no valid JWT cookie is present, or if token verification fails with a `401 Unauthorized` status, access is denied and the user is immediately redirected to `/login`.
+## 🎓 Lab 03 TA Viva Questions & Complete Answers (Full Marks)
 
-### Q4: Why do we fetch `/customers/me` instead of storing the user manually?
+### Q1: Why should product data come from MongoDB instead of being hardcoded in React?
 > **Answer:**
-> 1. **Single Source of Truth:** Storing user information manually in frontend `localStorage` or `sessionStorage` can easily become stale or manipulated by the client. Fetching `/customers/me` verifies that the session token is genuine and active in the database at that exact moment.
-> 2. **Security:** `localStorage` is vulnerable to XSS data theft. By relying on server-side token validation and querying `/customers/me`, sensitive account metadata remains protected and tamper-proof.
-> 3. **Instant Invalidation:** If an administrator suspends an account or a user changes their password on another device, `/customers/me` will immediately reject invalid requests.
+> - **Single Source of Truth:** Storing products in a centralized database ensures all users, microservices, mobile apps, and administrative panels view identical, synchronized data.
+> - **Dynamic Mutation & Real-Time Accuracy:** Stock levels change with every purchase. Hardcoded data cannot reflect real-time inventory updates, price adjustments, or new product launches without redeploying the frontend.
+> - **Scalability & Security:** An e-commerce store with millions of SKUs cannot load its entire inventory into browser memory. Storing data in MongoDB allows indexed querying, pagination, aggregation, and filtering directly at the database layer.
 
-### Q5: What is the difference between authentication and authorization?
+### Q2: What is the difference between a URL parameter and a query parameter?
 > **Answer:**
-> - **Authentication (AuthN):** The process of verifying **who** the user is (verifying identity). Examples: checking email and password during `POST /customers/login`, or validating a signed JWT.
-> - **Authorization (AuthZ):** The process of verifying **what permissions** an authenticated user has (verifying access rights). Examples: determining whether an authenticated customer can access an admin dashboard, edit another user's profile, or modify product inventories.
+> - **URL Parameter (Route Parameter):** Embedded directly into the path to uniquely identify a specific resource.
+>   - *Syntax:* `/products/:id` (e.g., `/products/66d123abc456`)
+>   - *Use Case:* Fetching an exact document or entity.
+> - **Query Parameter:** Appended to the URL following a `?` symbol as key-value pairs separated by `&`.
+>   - *Syntax:* `/products?category=Electronics&sort=price_asc`
+>   - *Use Case:* Modifying, filtering, sorting, or paginating a collection of resources without changing the underlying resource route.
+
+### Q3: When would you use `/products/:id` vs `/products?category=Electronics`?
+> **Answer:**
+> - Use `/products/:id` when retrieving a **single, discrete resource** by its unique identifier (e.g., viewing a specific product's detail page).
+> - Use `/products?category=Electronics` when retrieving a **filtered subset of a collection** where multiple items match the criteria (e.g., browsing the electronics aisle).
+
+### Q4: How does `.map()` help us render products dynamically?
+> **Answer:**
+> `.map()` is a declarative array transformation method. In React, it iterates over the products array returned from the API and transforms each raw JSON object into a JSX component instance (e.g., `<ProductCard key={product._id} product={product} />`). By pairing `.map()` with a unique `key` prop, React efficiently tracks changes, re-orders elements, and updates the virtual DOM with minimal overhead.
+
+### Q5: Why do we need loading and error states in a frontend application?
+> **Answer:**
+> - **Asynchronous Nature of Network Requests:** Network requests take unpredictable time to complete. Without a loading state, users experience an unresponsive blank screen or broken UI layout, leading to confusion and duplicate actions.
+> - **Fault Tolerance & User Experience (UX):** Network errors, offline connectivity, or server downtime are inevitable. An explicit error state informs the user what went wrong and provides recovery actions (e.g., a "Retry Connection" button).
+
+### Q6: What happens when the backend returns an empty array?
+> **Answer:**
+> When the backend returns an empty array (`[]`) (for instance, when search keywords or category filters match no products), the HTTP status is still `200 OK`.
+> In the frontend, an unhandled empty array would simply render nothing, giving the appearance of a broken or frozen page. Implementing an explicit **Empty State** (`products.length === 0`) allows us to render helpful feedback (`"No products found."`) along with actionable remedies such as a `"Clear All Filters"` button.
+
+### Q7: Why should search/filtering be handled by the backend instead of filtering a huge dataset only in React?
+> **Answer:**
+> 1. **Network Bandwidth:** Fetching millions of products to the client to filter locally consumes gigabytes of mobile data and causes extreme network latency.
+> 2. **Client Performance & Memory:** Processing, storing, and filtering large arrays in browser JavaScript causes UI thread blocking, lag, and potential browser tab crashes on mobile devices.
+> 3. **Database Indexing:** Databases like MongoDB use B-Tree and text indexes to evaluate filters and search queries in milliseconds across millions of records, returning only the requested slice of data.
+
+### Q8: Why should API/service logic be separated from UI components?
+> **Answer:**
+> - **Separation of Concerns (SoC):** UI components should focus purely on rendering view state and handling user events, not configuring HTTP headers or parsing raw error response formats.
+> - **Maintainability & Reusability:** If API endpoints, base URLs, or authentication headers change, edits are made in a single centralized file (`services/api.js`) without altering dozens of component files.
+> - **Testability:** Decoupled service modules can easily be mocked or unit-tested independently from React component lifecycle hooks.
+
+---
+
+## 🎓 Lab 02 TA Viva Questions & Answers
+
+1. **Why do we use `withCredentials: true`?**
+   > By default, browsers do not attach cookies to cross-origin AJAX requests (`CORS`). Setting `withCredentials: true` on Axios tells the browser to include the HttpOnly authentication cookie in requests to `http://localhost:5000` and store server `Set-Cookie` responses.
+2. **Why can't JavaScript read an HttpOnly cookie?**
+   > The `HttpOnly` flag prevents client-side scripts from reading the cookie via `document.cookie`, providing defense-in-depth against session hijacking via Cross-Site Scripting (XSS).
+3. **Why is `/home` called a protected route?**
+   > Because it requires a verified session. The component fetches `GET /customers/me` on mount; if unauthenticated, the user is immediately redirected to `/login`.
+4. **Why do we fetch `/customers/me` instead of storing the user manually?**
+   > To guarantee that the authenticated identity is verified against the database and prevent storing sensitive credentials in vulnerable client-side storage (`localStorage`).
+5. **Difference between authentication and authorization?**
+   > **Authentication** verifies *who you are* (identity). **Authorization** determines *what you are allowed to do* (access privileges).
 
 ---
 
 ## 🎓 Lab 01 TA Viva Questions & Answers
 
-### Q1: Why do we use **bcrypt** instead of encrypting passwords?
-> **Answer:**
-> Encryption is two-way: if an attacker obtains the encryption key, every password can be decrypted back to plaintext. Bcrypt is a one-way mathematical hashing algorithm with a salt and configurable work factor (key stretching), making it mathematically irreversible and resistant to brute-force and rainbow table attacks.
-
-### Q2: What information is typically stored inside a JWT payload?
-> **Answer:**
-> Non-sensitive claims such as user ID (`id`), token issuance time (`iat`), expiration time (`exp`), and optional roles/permissions. Sensitive information like plaintext passwords or credit card numbers must never be included because JWT payloads are merely base64url-encoded.
-
-### Q3: Why is the **HttpOnly** flag important for cookies?
-> **Answer:**
-> It prevents JavaScript from accessing the cookie via `document.cookie`, mitigating token theft from Cross-Site Scripting (XSS) vulnerabilities.
-
-### Q4: Why should passwords never be returned to the frontend?
-> **Answer:**
-> Returning password hashes exposes them to browser history, network logging tools, and client-side stores, giving attackers opportunity for offline dictionary and brute-force cracking. The frontend UI only needs profile identity fields (`fullName`, `email`, `phone`).
-
-### Q5: What is the purpose of authentication middleware?
-> **Answer:**
-> It acts as a gatekeeper in the request pipeline: extracting the token, verifying its cryptographic signature and validity, retrieving the user from the database, and attaching the user object to `req.user` for protected route handlers.
+1. **Why use bcrypt over encryption?**
+   > Encryption is two-way and reversible with a key. Bcrypt is a one-way cryptographic hash with salting and an adjustable work factor, preventing decryption and rainbow table attacks.
+2. **What information is stored inside a JWT payload?**
+   > Non-sensitive claims like customer ID (`id`), issuance time (`iat`), and expiration time (`exp`). Passwords and secrets must never be placed inside a JWT payload.
+3. **Why is the HttpOnly flag important?**
+   > Protects the cookie from access via client JavaScript, stopping token theft through XSS.
+4. **Why should passwords never be returned to frontend?**
+   > Exposing hashes creates opportunities for offline cracking and leaks sensitive information to browser caches and logs.
+5. **Purpose of authentication middleware?**
+   > Extracts and verifies the token, validates user existence in the database, attaches the user to `req.user`, and blocks unauthenticated requests with `401 Unauthorized`.

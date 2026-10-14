@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
   Mail,
@@ -103,6 +103,15 @@ const Home = ({ customer, setCustomer }) => {
             <p className="mt-2 text-indigo-100 text-sm sm:text-base leading-relaxed">
               Explore today's exclusive offers, manage your cart, and track your recent orders across ShopKart.
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-indigo-700 bg-white hover:bg-indigo-50 shadow-md transition"
+              >
+                <ShoppingBag className="w-4 h-4 text-indigo-600" />
+                <span>Explore Products Catalog</span>
+              </Link>
+            </div>
           </div>
 
           <div className="absolute -right-8 -bottom-10 opacity-15 pointer-events-none">

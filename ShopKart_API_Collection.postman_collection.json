@@ -1,0 +1,360 @@
+{
+  "info": {
+    "_postman_id": "c1f7b8a2-8924-42b7-a3e9-74d6c449339e",
+    "name": "ShopKart Fullstack API Suite (Labs 01 - 03)",
+    "description": "Comprehensive Postman test collection for ShopKart Customer Authentication and Product Catalog & Discovery APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "sample_product_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Customer Authentication (Lab 01 & 02)",
+      "item": [
+        {
+          "name": "1. Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\",\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/register",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "register"]
+            }
+          }
+        },
+        {
+          "name": "2. Register (Duplicate Email - 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"jane123\",\n  \"phone\": \"9876543211\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/register",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "register"]
+            }
+          }
+        },
+        {
+          "name": "3. Register (Short Password - 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Short Pwd\",\n  \"email\": \"short@gmail.com\",\n  \"password\": \"123\",\n  \"phone\": \"9876543212\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/register",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "register"]
+            }
+          }
+        },
+        {
+          "name": "4. Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/login",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "login"]
+            }
+          }
+        },
+        {
+          "name": "5. Login (Invalid Credentials - 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/login",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "login"]
+            }
+          }
+        },
+        {
+          "name": "6. My Profile (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/me",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "me"]
+            }
+          }
+        },
+        {
+          "name": "7. Change Password (Bonus - Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"john123\",\n  \"newPassword\": \"newjohn123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "8. Logout (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/logout",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Catalog & Discovery (Lab 03)",
+      "item": [
+        {
+          "name": "1. Create Product (POST /products)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mechanical Keyboard\",\n  \"description\": \"RGB mechanical keyboard with blue switches.\",\n  \"price\": 2999,\n  \"category\": \"Electronics\",\n  \"image\": \"https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80\",\n  \"stock\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "2. Create Product (Missing Field - 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Incomplete Item\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "3. Create Product (Invalid Price - 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad Price Item\",\n  \"description\": \"Test item\",\n  \"price\": -50,\n  \"category\": \"Electronics\",\n  \"image\": \"https://example.com/test.jpg\",\n  \"stock\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "4. Create Product (Invalid Stock - 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad Stock Item\",\n  \"description\": \"Test item\",\n  \"price\": 500,\n  \"category\": \"Electronics\",\n  \"image\": \"https://example.com/test.jpg\",\n  \"stock\": -3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "5. Get All Products (GET /products)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "6. Search Products by Name (?search=keyboard)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?search=keyboard",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "search", "value": "keyboard" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Filter Products by Category (?category=Electronics)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?category=Electronics",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "category", "value": "Electronics" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Combined Search & Category (?search=keyboard&category=Electronics)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?search=keyboard&category=Electronics",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "search", "value": "keyboard" },
+                { "key": "category", "value": "Electronics" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "9. Sort by Price Ascending (Bonus: ?sort=price_asc)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?sort=price_asc",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "sort", "value": "price_asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "10. Sort by Price Descending (Bonus: ?sort=price_desc)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?sort=price_desc",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "sort", "value": "price_desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "11. Get Single Product (GET /products/:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{sample_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{sample_product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "12. Get Single Product (Invalid ID - 400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/invalid-id-format",
+              "host": ["{{base_url}}"],
+              "path": ["products", "invalid-id-format"]
+            }
+          }
+        },
+        {
+          "name": "13. Get Single Product (Not Found - 404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/000000000000000000000999",
+              "host": ["{{base_url}}"],
+              "path": ["products", "000000000000000000000999"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -31,6 +31,25 @@ const Navbar = ({ customer, setCustomer }) => {
             </span>
           </Link>
 
+          {/* Main Navigation Links */}
+          <div className="flex items-center gap-6">
+            <Link
+              to="/products"
+              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5"
+            >
+              <ShoppingBag className="w-4 h-4 text-indigo-600" />
+              <span>Products</span>
+            </Link>
+            {customer && (
+              <Link
+                to="/home"
+                className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition"
+              >
+                Profile & Home
+              </Link>
+            )}
+          </div>
+
           {/* User Controls & Navigation */}
           <nav className="flex items-center gap-4">
             {customer ? (
