@@ -1,0 +1,188 @@
+{
+  "info": {
+    "_postman_id": "c1f7b8a2-8924-42b7-a3e9-74d6c449339e",
+    "name": "ShopKart - Customer Authentication Service",
+    "description": "Comprehensive Postman test collection for ShopKart Customer Authentication Service (Lab 01).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Task 1 - Register Customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\",\n  \"phone\": \"9876543210\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/register",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "register"]
+        },
+        "description": "Register a new customer. Returns 201 Created and customer details excluding password."
+      }
+    },
+    {
+      "name": "Task 1 - Register (Duplicate Email - 409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"jane123\",\n  \"phone\": \"9876543211\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/register",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "register"]
+        },
+        "description": "Attempt registration with existing email. Returns 409 Conflict."
+      }
+    },
+    {
+      "name": "Task 1 - Register (Short Password - 400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Short Pwd\",\n  \"email\": \"short@gmail.com\",\n  \"password\": \"123\",\n  \"phone\": \"9876543212\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/register",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "register"]
+        },
+        "description": "Attempt registration with password shorter than 6 characters. Returns 400 Bad Request."
+      }
+    },
+    {
+      "name": "Task 2 - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/login",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "login"]
+        },
+        "description": "Logs in customer, returns success response and sets an HttpOnly cookie containing JWT."
+      }
+    },
+    {
+      "name": "Task 2 - Login (Invalid Credentials - 401)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"wrongpassword\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/login",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "login"]
+        },
+        "description": "Attempt login with invalid credentials. Returns 401 without revealing whether email or password was wrong."
+      }
+    },
+    {
+      "name": "Task 3 - My Profile (Protected)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers/me",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "me"]
+        },
+        "description": "Protected route. Automatically uses HttpOnly cookie from Login to retrieve current profile (without password)."
+      }
+    },
+    {
+      "name": "Bonus - Change Password (Protected)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"oldPassword\": \"john123\",\n  \"newPassword\": \"newjohn123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/change-password",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "change-password"]
+        },
+        "description": "Bonus Task: Verifies old password and hashes & updates to new password."
+      }
+    },
+    {
+      "name": "Task 4 - Logout (Protected)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers/logout",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "logout"]
+        },
+        "description": "Clears the HttpOnly authentication cookie."
+      }
+    },
+    {
+      "name": "Task 3 - My Profile After Logout (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers/me",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "me"]
+        },
+        "description": "Verifies that after logout, profile access is rejected with 401 Unauthorized."
+      }
+    }
+  ]
+}
