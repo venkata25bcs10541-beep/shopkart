@@ -7,6 +7,7 @@ import {
   Heart,
   Home as HomeIcon,
   ShoppingCart,
+  Package,
 } from 'lucide-react';
 import { logoutCustomer } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -72,7 +73,7 @@ const Navbar = ({ customer, setCustomer }) => {
               <span>Wishlist</span>
             </Link>
 
-            {/* Cart Link with Dynamic Count Badge (Lab 05 Task 9) */}
+            {/* Cart Link with Dynamic Count Badge */}
             <Link
               to="/cart"
               className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5 relative"
@@ -86,6 +87,15 @@ const Navbar = ({ customer, setCustomer }) => {
                 )}
               </div>
               <span>Cart{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+            </Link>
+
+            {/* My Orders */}
+            <Link
+              to="/orders"
+              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5"
+            >
+              <Package className="w-4 h-4 text-slate-500" />
+              <span>Orders</span>
             </Link>
           </div>
 

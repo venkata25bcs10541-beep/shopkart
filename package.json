@@ -10,5 +10,8 @@
     "build:frontend": "npm run build --prefix frontend",
     "test": "npm test --prefix backend",
     "seed": "npm run seed --prefix backend"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.8"
   }
 }
