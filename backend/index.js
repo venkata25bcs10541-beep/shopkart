@@ -7,6 +7,7 @@ const cors = require('cors');
 const customerRoutes = require('./routes/customer.routes');
 const productRoutes = require('./routes/product.routes');
 const wishlistRoutes = require('./routes/wishlist.routes');
+const cartRoutes = require('./routes/cart.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 app.use('/customers', customerRoutes);
 app.use('/products', productRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/cart', cartRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {
@@ -54,16 +56,18 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB & Start Server
 if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+
   mongoose
     .connect(MONGO_URI)
     .then(() => {
       console.log('Successfully connected to MongoDB');
-      app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-      });
     })
     .catch((err) => {
-      console.error('MongoDB connection error:', err.message);
+      console.warn('MongoDB connection warning:', err.message);
+      console.warn('Note: Connect a local MongoDB or set MONGO_URI in backend/.env');
     });
 }
 

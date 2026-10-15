@@ -34,6 +34,22 @@ const customerSchema = new mongoose.Schema(
         ref: 'Product',
       },
     ],
+
+    // Lab 05 Task 1: Cart — stores product reference + quantity per item
+    cart: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          default: 1,
+          min: 1,
+        },
+      },
+    ],
   },
   {
     versionKey: false,

@@ -1,10 +1,24 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, LogOut, User as UserIcon, Heart, Home as HomeIcon } from 'lucide-react';
+import {
+  ShoppingBag,
+  LogOut,
+  User as UserIcon,
+  Heart,
+  Home as HomeIcon,
+  ShoppingCart,
+} from 'lucide-react';
 import { logoutCustomer } from '../services/api';
+import { useCart } from '../context/CartContext';
 
+/**
+ * Navbar — Lab 05 Task 9: Cart count badge integration.
+ * The count is sourced from CartContext (global shared state),
+ * so it updates automatically after any cart mutation without page refresh.
+ */
 const Navbar = ({ customer, setCustomer }) => {
   const navigate = useNavigate();
+  const { cartCount, clearCart } = useCart();
 
   const handleLogout = async () => {
     try {
@@ -13,6 +27,7 @@ const Navbar = ({ customer, setCustomer }) => {
       console.error('Logout error:', err);
     } finally {
       if (setCustomer) setCustomer(null);
+      clearCart(); // Clear global cart state on logout
       navigate('/login');
     }
   };
@@ -31,7 +46,7 @@ const Navbar = ({ customer, setCustomer }) => {
             </span>
           </Link>
 
-          {/* Main Navigation Links: Home | Products | Wishlist */}
+          {/* Main Navigation Links */}
           <div className="flex items-center gap-6">
             {customer && (
               <Link
@@ -56,9 +71,25 @@ const Navbar = ({ customer, setCustomer }) => {
               <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
               <span>Wishlist</span>
             </Link>
+
+            {/* Cart Link with Dynamic Count Badge (Lab 05 Task 9) */}
+            <Link
+              to="/cart"
+              className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition flex items-center gap-1.5 relative"
+            >
+              <div className="relative">
+                <ShoppingCart className="w-4 h-4 text-indigo-500" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 flex items-center justify-center text-[10px] font-bold text-white bg-indigo-600 rounded-full">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </div>
+              <span>Cart{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+            </Link>
           </div>
 
-          {/* User Controls & Navigation */}
+          {/* User Controls */}
           <nav className="flex items-center gap-4">
             {customer ? (
               <div className="flex items-center gap-4">
@@ -68,7 +99,7 @@ const Navbar = ({ customer, setCustomer }) => {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-lg transition"
+                  className="flex items-center gap-2 text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-lg transition cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>

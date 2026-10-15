@@ -118,11 +118,51 @@ export const toggleWishlist = async (productId) => {
 };
 
 /**
- * Lab 04 Bonus 2: Get wishlist count for navbar badge
+ * Lab 05 Bonus: Get wishlist count for navbar badge
  * GET /wishlist/count
  */
 export const getWishlistCount = async () => {
   const response = await API.get('/wishlist/count');
+  return response.data;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lab 05 — Cart API Methods
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Lab 05 Task 2: Add product to cart (or increment quantity)
+ * POST /cart/:productId
+ */
+export const addToCart = async (productId) => {
+  const response = await API.post(`/cart/${productId}`);
+  return response.data;
+};
+
+/**
+ * Lab 05 Task 3: Get current user's populated cart
+ * GET /cart
+ */
+export const getCart = async () => {
+  const response = await API.get('/cart');
+  return response.data;
+};
+
+/**
+ * Lab 05 Task 4: Update quantity of a cart item
+ * PATCH /cart/:productId
+ */
+export const updateCartQuantity = async (productId, quantity) => {
+  const response = await API.patch(`/cart/${productId}`, { quantity });
+  return response.data;
+};
+
+/**
+ * Lab 05 Task 5: Remove product from cart
+ * DELETE /cart/:productId
+ */
+export const removeFromCart = async (productId) => {
+  const response = await API.delete(`/cart/${productId}`);
   return response.data;
 };
 
