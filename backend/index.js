@@ -17,7 +17,18 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shopkart';
 // Middlewares
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+      if (
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1') ||
+        origin.endsWith('.vercel.app')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback: allow origin with credentials
+    },
     credentials: true,
   })
 );
