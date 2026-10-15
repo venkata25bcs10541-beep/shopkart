@@ -7,8 +7,14 @@ frontend/node_modules/
 dist/
 frontend/dist/
 
-# Environment files
+# Environment files — NEVER commit secrets
+.env
 .env.local
+.env.production
+backend/.env
+frontend/.env
+
+# Logs
 *.log
 
 # OS files
